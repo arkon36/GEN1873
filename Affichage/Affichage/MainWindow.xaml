@@ -1,0 +1,21 @@
+﻿<Window x:Class="Affichage.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Affichage"
+        mc:Ignorable="d"
+        Title="Information" Height="306.475" Width="237.979">
+    <Grid>
+        <ListView Name="BattementGrid" Margin="12,109,10,10" ItemsSource="{Binding listeBattement}">
+            <ListView.View>
+                <GridView x:Name="grdTest">
+                    <GridViewColumn Header="Temps" DisplayMemberBinding="{Binding Temps}"  Width="110"/>
+                    <GridViewColumn Header="Battement" DisplayMemberBinding="{Binding Battement}"  Width="100" />
+                </GridView>
+            </ListView.View>
+        </ListView>
+        <Label Height="39" HorizontalAlignment="Left" Margin="12,56,0,0" Name="labelLastBattement" VerticalAlignment="Top" Width="207" Content="{Binding LastBattement}" FontSize="24" FontWeight="Bold" />
+        <Label Content="Battement Actuel" HorizontalAlignment="Left" Margin="12,12,0,224" Name="labelBattementAct" FontWeight="Bold" FontSize="24" Width="207" Height="39" />
+    </Grid>
+</Window>
