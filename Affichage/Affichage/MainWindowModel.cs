@@ -1,5 +1,7 @@
-﻿using System;
+﻿using LiveCharts;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
@@ -10,9 +12,10 @@ namespace Affichage
     class MainWindowModel : INotifyPropertyChanged
     {
 
+        public SeriesCollection ChartData { get; set; }
 
-        public BindingList<BattementCardiaque> listeBattement { get; set; }
-        public void AddItemToList(string _temps, int _battement)
+        public ObservableCollection<BattementCardiaque> listeBattement { get; set; }
+        public void AddItemToList(int _temps, int _battement)
         {
             listeBattement.Add(new BattementCardiaque(_temps, _battement));
         }
@@ -33,7 +36,7 @@ namespace Affichage
 
         public MainWindowModel()
         {
-            listeBattement = new BindingList<BattementCardiaque>();
+            listeBattement = new ObservableCollection<BattementCardiaque>();
         }
 
         #region INotifyPropertyChanged Members  
@@ -54,7 +57,7 @@ namespace Affichage
     {
 
         private int battement;
-        private string temps;
+        private int temps;
         public int Battement
         {
             get
@@ -67,7 +70,7 @@ namespace Affichage
                 OnPropertyChanged("Battement");
             }
         }
-        public string Temps
+        public int Temps
         {
             get
             {
@@ -80,7 +83,7 @@ namespace Affichage
             }
         }
 
-        public BattementCardiaque(string _temps, int _battement)
+        public BattementCardiaque(int _temps, int _battement)
         {
             Temps = _temps;
             Battement = _battement;

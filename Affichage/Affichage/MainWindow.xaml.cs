@@ -1,4 +1,8 @@
-﻿using System;
+﻿using LiveCharts;
+using LiveCharts.Configurations;
+using LiveCharts.Helpers;
+using LiveCharts.Wpf;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,11 +29,23 @@ namespace Affichage
             InitializeComponent();
             MainWindowModel model = new MainWindowModel();
             this.DataContext = model;
-            model.listeBattement.Insert(0, new BattementCardiaque("5:35", 70));
-            model.listeBattement.Insert(0, new BattementCardiaque("5:36", 73));
-            model.listeBattement.Insert(0, new BattementCardiaque("5:37", 65));
-            model.listeBattement.Insert(0, new BattementCardiaque("5:38", 68));
+            model.listeBattement.Insert(0, new BattementCardiaque(0, 70));
+            model.listeBattement.Insert(0, new BattementCardiaque(1, 73));
+            model.listeBattement.Insert(0, new BattementCardiaque(4, 65));
+            model.listeBattement.Insert(0, new BattementCardiaque(9, 68));
             model.LastBattement = model.listeBattement.First().Battement;
+            model.ChartData = new SeriesCollection()
+            {
+                new LineSeries()
+                {
+                Configuration = new CartesianMapper<BattementCardiaque>()
+                .X(point => point.Temps) // Define a function that returns a value that should map to the x-axis
+                .Y(point => point.Battement), // Define a function that returns a value that should map to the y-axis
+                Title = "Battement Cardiaque à chaque seconde",
+                Values = model.listeBattement.AsChartValues(),
+                PointGeometry = DefaultGeometries.Circle
+                }
+            };
         }
 
 
