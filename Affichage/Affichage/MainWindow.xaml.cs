@@ -24,30 +24,34 @@ namespace Affichage
     /// </summary>
     public partial class MainWindow : Window
     {
+        private MainWindowModel model;
         public MainWindow()
         {
             InitializeComponent();
-            MainWindowModel model = new MainWindowModel();
+            model = new MainWindowModel();
             this.DataContext = model;
-            model.listeBattement.Insert(0, new BattementCardiaque(0, 70));
-            model.listeBattement.Insert(0, new BattementCardiaque(1, 73));
-            model.listeBattement.Insert(0, new BattementCardiaque(4, 65));
-            model.listeBattement.Insert(0, new BattementCardiaque(9, 68));
-            model.LastBattement = model.listeBattement.First().Battement;
-            model.ChartData = new SeriesCollection()
-            {
-                new LineSeries()
-                {
-                Configuration = new CartesianMapper<BattementCardiaque>()
-                .X(point => point.Temps) // Define a function that returns a value that should map to the x-axis
-                .Y(point => point.Battement), // Define a function that returns a value that should map to the y-axis
-                Title = "Battement Cardiaque à chaque seconde",
-                Values = model.listeBattement.AsChartValues(),
-                PointGeometry = DefaultGeometries.Circle
-                }
-            };
+            model.ListeBattement.Insert(0, new BattementCardiaque(0, 70));
+            model.ListeBattement.Insert(0, new BattementCardiaque(1, 73));
+            model.ListeBattement.Insert(0, new BattementCardiaque(4, 65));
+            model.ListeBattement.Insert(0, new BattementCardiaque(9, 68));
+            model.LastBattement = model.ListeBattement.First().Battement;
+
+
+            model.ChartData[0].Values = model.ListeBattement.AsChartValues();
+
+            model.ListeBattement.Insert(0, new BattementCardiaque(9, 15));
+            model.ListeBattement.Insert(0, new BattementCardiaque(-4, 28));
+            model.ListeBattement.Insert(0, new BattementCardiaque(15, 108));
+            model.ListeBattement.Insert(0, new BattementCardiaque(100, 2000));
+            model.ChartData[0].Values = model.ListeBattement.AsChartValues();
+            AddBattementCardiaque(new BattementCardiaque(-100, -2000)); 
         }
 
+        private void AddBattementCardiaque(BattementCardiaque battement)
+        {
+            model.ListeBattement.Insert(0, battement);
+            model.ChartData[0].Values.Add(battement);
+        }
 
         /*********
          * Trouver une facon d'ajouter matlab
