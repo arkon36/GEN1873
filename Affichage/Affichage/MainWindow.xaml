@@ -8,23 +8,43 @@
         mc:Ignorable="d"
         Title="Information" Height="306.475" Width="543.58">
     <Grid>
-        <ListView x:Name="BattementGrid" Margin="12,107,0,12" ItemsSource="{Binding ListeBattement}" HorizontalAlignment="Left" Width="218">
-            <ListView.View>
-                <GridView x:Name="grdTest">
-                    <GridViewColumn Header="Temps" DisplayMemberBinding="{Binding Temps}"  Width="110"/>
-                    <GridViewColumn Header="Battement" DisplayMemberBinding="{Binding Battement}"  Width="100" />
-                </GridView>
-            </ListView.View>
-        </ListView>
-        <Label Height="39" HorizontalAlignment="Left" Margin="12,56,0,0" x:Name="labelLastBattement" VerticalAlignment="Top" Width="207" Content="{Binding LastBattement}" FontSize="24" FontWeight="Bold" />
-        <Label Content="Battement Actuel" HorizontalAlignment="Left" Margin="12,12,0,0" x:Name="labelBattementAct" FontWeight="Bold" FontSize="24" Width="207" Height="39" VerticalAlignment="Top" />
-        <Wpf:CartesianChart  Margin="235,8,10,10" Series="{Binding ChartData}" TabIndex="2147483645" Zoom="{Binding ZoomingMode}">
-            <Wpf:CartesianChart.AxisY>
-                <Wpf:Axis Title ="Battement (Battement/Minute)" Foreground="Black"/>
-            </Wpf:CartesianChart.AxisY>
-            <Wpf:CartesianChart.AxisX>
-                <Wpf:Axis Title="Temps (seconde)" Foreground="#FF303030"/>
-            </Wpf:CartesianChart.AxisX>
-        </Wpf:CartesianChart>
+
+        <TabControl x:Name="tabControl" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+            <TabItem Header="Battement">
+                <Grid Background="#FFE5E5E5">
+                    <ListView x:Name="BattementGrid" Margin="12,107,0,12" ItemsSource="{Binding ListeBattement}" HorizontalAlignment="Left" Width="218">
+                        <ListView.View>
+                            <GridView x:Name="grdTest">
+                                <GridViewColumn Header="Temps" DisplayMemberBinding="{Binding Temps}"  Width="110"/>
+                                <GridViewColumn Header="Battement" DisplayMemberBinding="{Binding Battement}"  Width="100" />
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                    <Label Height="39" HorizontalAlignment="Left" Margin="12,56,0,0" x:Name="labelLastBattement" VerticalAlignment="Top" Width="207" Content="{Binding LastBattement}" FontSize="24" FontWeight="Bold" />
+                    <Label Content="Battement Actuel" HorizontalAlignment="Left" Margin="12,12,0,0" x:Name="labelBattementAct" FontWeight="Bold" FontSize="24" Width="207" Height="39" VerticalAlignment="Top" />
+                    <Wpf:CartesianChart  Margin="235,8,10,10" Series="{Binding ChartData}" TabIndex="2147483645" Zoom="{Binding ZoomingMode}">
+                        <Wpf:CartesianChart.AxisY>
+                            <Wpf:Axis Title ="Battement (Battement/Minute)" Foreground="Black"/>
+                        </Wpf:CartesianChart.AxisY>
+                        <Wpf:CartesianChart.AxisX>
+                            <Wpf:Axis Title="Temps (seconde)" Foreground="#FF303030"/>
+                        </Wpf:CartesianChart.AxisX>
+                    </Wpf:CartesianChart>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Reponse Cardiaque">
+                <Grid Background="#FFE5E5E5">
+                    <Wpf:CartesianChart  Margin="10,8,10,30" Series="{Binding ChartDataVoltage}" TabIndex="2147483645" Zoom="{Binding ZoomingModeVoltage}" Hoverable="False" DataTooltip="{x:Null}">
+                        <Wpf:CartesianChart.AxisY>
+                            <Wpf:Axis Title ="Voltage" Foreground="Black"/>
+                        </Wpf:CartesianChart.AxisY>
+                        <Wpf:CartesianChart.AxisX>
+                            <Wpf:Axis Title="Temps (seconde)" Foreground="#FF303030"/>
+                        </Wpf:CartesianChart.AxisX>
+                    </Wpf:CartesianChart>
+                    <Button x:Name="button" Content="Test" HorizontalAlignment="Left" Margin="445,222,0,0" VerticalAlignment="Top" Width="75" Click="button_Click"/>
+                </Grid>
+            </TabItem>
+        </TabControl>
     </Grid>
 </Window>

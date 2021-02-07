@@ -16,7 +16,11 @@ namespace Affichage
 {
     class MainWindowModel : INotifyPropertyChanged
     {
+
+        
+
         public SeriesCollection ChartData { get; set; }
+        public SeriesCollection ChartDataVoltage { get; set; }
 
         private ZoomingOptions _zoomingMode;
         public ZoomingOptions ZoomingMode
@@ -29,13 +33,19 @@ namespace Affichage
             }
         }
 
-        public ObservableCollection<BattementCardiaque> ListeBattement { get; set; }
-        
-        public void AddItemToList(int _temps, int _battement)
+        private ZoomingOptions _zoomingModeVoltage;
+        public ZoomingOptions ZoomingModeVoltage
         {
-            ListeBattement.Add(new BattementCardiaque(_temps, _battement));
+            get { return _zoomingModeVoltage; }
+            set
+            {
+                _zoomingModeVoltage = value;
+                OnPropertyChanged();
+            }
         }
 
+        public ObservableCollection<BattementCardiaque> ListeBattement { get; set; }
+        
         private int lastBattement;
         public int LastBattement
         {
@@ -68,6 +78,20 @@ namespace Affichage
             };
 
             ZoomingMode = ZoomingOptions.Xy;
+
+            ChartDataVoltage = new SeriesCollection()
+            {
+                new LineSeries()
+                {
+                Configuration = new CartesianMapper<Voltage>()
+                .X(point => point.temps) // Define a function that returns a value that should map to the x-axis
+                .Y(point => point.voltage), // Define a function that returns a value that should map to the y-axis
+                Title = "Réponse impulsionnel du coeur",
+                PointGeometry = null
+                }
+            };
+
+            ZoomingModeVoltage = ZoomingOptions.Xy;
 
         }
 
@@ -135,5 +159,17 @@ namespace Affichage
         #endregion
     }
 
-    
+    public class Voltage
+    {
+        public double voltage;
+        public double temps;
+
+        public Voltage(double _temps, double _voltage)
+        {
+            temps = _temps;
+            voltage = _voltage;
+        }
+    }
+
+
 }
