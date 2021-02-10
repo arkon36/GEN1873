@@ -15,8 +15,8 @@
                     <ListView x:Name="BattementGrid" Margin="12,107,0,12" ItemsSource="{Binding ListeBattement}" HorizontalAlignment="Left" Width="218">
                         <ListView.View>
                             <GridView x:Name="grdTest">
-                                <GridViewColumn Header="Temps" DisplayMemberBinding="{Binding Temps}"  Width="110"/>
-                                <GridViewColumn Header="Battement" DisplayMemberBinding="{Binding Battement}"  Width="100" />
+                                <GridViewColumn Header="Temps" DisplayMemberBinding="{Binding Temps}"  Width="100"/>
+                                <GridViewColumn Header="Battement" DisplayMemberBinding="{Binding Battement}"  Width="90" />
                             </GridView>
                         </ListView.View>
                     </ListView>
@@ -34,7 +34,7 @@
             </TabItem>
             <TabItem Header="Reponse Cardiaque">
                 <Grid Background="#FFE5E5E5">
-                    <Wpf:CartesianChart  Margin="10,8,10,30" Series="{Binding ChartDataVoltage}" TabIndex="2147483645" Zoom="{Binding ZoomingModeVoltage}" Hoverable="False" DataTooltip="{x:Null}">
+                    <Wpf:CartesianChart  Margin="10,8,10,10" Series="{Binding ChartDataVoltage}" TabIndex="2147483645" Zoom="{Binding ZoomingModeVoltage}" Hoverable="False" DataTooltip="{x:Null}">
                         <Wpf:CartesianChart.AxisY>
                             <Wpf:Axis Title ="Voltage" Foreground="Black"/>
                         </Wpf:CartesianChart.AxisY>
@@ -42,7 +42,6 @@
                             <Wpf:Axis Title="Temps (seconde)" Foreground="#FF303030"/>
                         </Wpf:CartesianChart.AxisX>
                     </Wpf:CartesianChart>
-                    <Button x:Name="button" Content="Test" HorizontalAlignment="Left" Margin="445,222,0,0" VerticalAlignment="Top" Width="75" Click="button_Click"/>
                 </Grid>
             </TabItem>
         </TabControl>

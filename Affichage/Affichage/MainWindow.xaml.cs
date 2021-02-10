@@ -40,22 +40,28 @@ namespace Affichage
             InitializeComponent();
             model = new MainWindowModel();
             this.DataContext = model;
-            AddBattementCardiaque(new BattementCardiaque(0, 70));
-            AddBattementCardiaque(new BattementCardiaque(1, 73));
-            AddBattementCardiaque(new BattementCardiaque(4, 65));
-            AddBattementCardiaque(new BattementCardiaque(9, 68));
+            //AddBattementCardiaque(new BattementCardiaque(0, 70));
+            //AddBattementCardiaque(new BattementCardiaque(1, 73));
+            //AddBattementCardiaque(new BattementCardiaque(4, 65));
+            //AddBattementCardiaque(new BattementCardiaque(9, 68));
             
 
-            AddBattementCardiaque(new BattementCardiaque(10, 15));
-            AddBattementCardiaque(new BattementCardiaque(14, 28));
-            AddBattementCardiaque(new BattementCardiaque(15, 108));
-            AddBattementCardiaque(new BattementCardiaque(25, 2000));
-            AddBattementCardiaque(new BattementCardiaque(50, -2000));
-            model.LastBattement = model.ListeBattement.First().Battement;
+            //AddBattementCardiaque(new BattementCardiaque(10, 15));
+            //AddBattementCardiaque(new BattementCardiaque(14, 28));
+            //AddBattementCardiaque(new BattementCardiaque(15, 108));
+            //AddBattementCardiaque(new BattementCardiaque(16, 2000));
+            //AddBattementCardiaque(new BattementCardiaque(17, -2000));
+            //model.LastBattement = model.ListeBattement.First().Battement;
             LoadCsvFile();
 
             ReceiveInfo = new Thread(new ThreadStart(listen));
             ReceiveInfo.Start();
+
+            Thread addinfo = new Thread(new ThreadStart(tempo));
+            addinfo.Start();
+
+            Thread t = new Thread(new ThreadStart(AddInfoToGraph));
+            t.Start();
 
         }
 
@@ -66,6 +72,7 @@ namespace Affichage
                 model.ChartData[0].Values.Add(battement);
             else
                 model.ChartData[0].Values = model.ListeBattement.AsChartValues();
+            model.LastBattement = model.ListeBattement.First().Battement;
 
         }
 
@@ -139,7 +146,7 @@ namespace Affichage
 
         public void AddInfoToGraph()
         {
-            for (int i = 0; i < 160; i++)
+            while(true)
             {
                 Dispatcher.BeginInvoke(new Action(() =>
                             {
@@ -163,10 +170,28 @@ namespace Affichage
                                     model.ChartDataVoltage[0].Values.Add(new Voltage(temp, voltTemp));
 
                             }), DispatcherPriority.Background);
-                Thread.Sleep(30);
+                Thread.Sleep(1000);
             }
 
         }
+
+
+        public void tempo()
+        {
+            int tempo = 18;
+            Random random = new Random();
+            while (true)
+            {
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    AddBattementCardiaque(new BattementCardiaque(tempo, random.Next(50, 100)));
+                    tempo = tempo + 1;
+                }), DispatcherPriority.Background);
+                Thread.Sleep(10000);
+            }
+
+        }
+
 
         public void listen()
         {
