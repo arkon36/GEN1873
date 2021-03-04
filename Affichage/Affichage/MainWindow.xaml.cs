@@ -4,6 +4,7 @@ using LiveCharts.Helpers;
 using LiveCharts.Wpf;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -89,7 +90,7 @@ namespace Affichage
                 {
                     string[] info = currentLine.Split(',');
 
-                    if (Double.TryParse(info[0], out double temps) && Double.TryParse(info[1], out double voltage))
+                    if (Double.TryParse(info[0], NumberStyles.Any, CultureInfo.InvariantCulture, out double temps) && Double.TryParse(info[1], NumberStyles.Any, CultureInfo.InvariantCulture, out double voltage))
                     {
                         temp = temps;
                         if (model.ChartDataVoltage[0].Values != null)
@@ -195,7 +196,63 @@ namespace Affichage
 
         public void listen()
         {
-            TcpListener server = null;
+            TcpListener listener = null;
+            try
+            {
+                int PORT_NO = 5000;
+                string SERVER_IP = "127.0.0.1";
+                IPAddress localAdd = IPAddress.Parse(SERVER_IP);
+                listener = new TcpListener(localAdd, PORT_NO);
+                
+                Console.WriteLine("Listening...");
+                listener.Start();
+                while (true)
+                {
+                    //---incoming client connected---
+                    TcpClient client = listener.AcceptTcpClient();
+
+                    //---get the incoming data through a network stream---
+                    NetworkStream nwStream = client.GetStream();
+                    byte[] buffer = new byte[client.ReceiveBufferSize];
+
+                    //---read incoming stream---
+                    int bytesRead = nwStream.Read(buffer, 0, client.ReceiveBufferSize);
+
+                    //---convert the data received into a string---
+                    string dataReceived = Encoding.ASCII.GetString(buffer, 0, bytesRead);
+                    Console.WriteLine("Received : " + dataReceived);
+
+                    //---write back the text to the client---
+                    byte[] bytesToSend = ASCIIEncoding.ASCII.GetBytes("Message received");
+                    Console.WriteLine("Sending : " + "Message received");
+                    nwStream.Write(bytesToSend, 0, bytesToSend.Length);
+                    client.Close();
+
+                    Console.ReadLine();
+                }
+            }
+            catch (System.Net.Sockets.SocketException e)
+            {
+                System.Diagnostics.Debug.WriteLine("SocketException: {0}", e);
+            }
+            finally
+            {
+                // Stop listening for new clients.
+                listener.Stop();
+            }
+            
+
+
+
+
+
+
+
+
+
+
+
+            /*TcpListener server = null;
             try
             {
                 // Set the TcpListener on port 13000.
@@ -215,12 +272,12 @@ namespace Affichage
                 // Enter the listening loop.
                 while (true)
                 {
-                    Console.Write("Waiting for a connection... ");
+                    System.Diagnostics.Debug.WriteLine("Waiting for a connection... ");
 
                     // Perform a blocking call to accept requests.
                     // You could also use server.AcceptSocket() here.
                     TcpClient client = server.AcceptTcpClient();
-                    Console.WriteLine("Connected!");
+                    System.Diagnostics.Debug.WriteLine("Connected!");
 
                     data = null;
 
@@ -234,7 +291,7 @@ namespace Affichage
                     {
                         // Translate data bytes to a ASCII string.
                         data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
-                        Console.WriteLine("Received: {0}", data);
+                        System.Diagnostics.Debug.WriteLine("Received: {0}", data);
 
                         // Process the data sent by the client.
                         data = data.ToUpper();
@@ -243,7 +300,7 @@ namespace Affichage
 
                         // Send back a response.
                         stream.Write(msg, 0, msg.Length);
-                        Console.WriteLine("Sent: {0}", data);
+                        System.Diagnostics.Debug.WriteLine("Sent: {0}", data);
                     }
 
                     // Shutdown and end connection
@@ -252,7 +309,7 @@ namespace Affichage
             }
             catch (System.Net.Sockets.SocketException e)
             {
-                Console.WriteLine("SocketException: {0}", e);
+                System.Diagnostics.Debug.WriteLine("SocketException: {0}", e);
             }
             finally
             {
@@ -260,8 +317,8 @@ namespace Affichage
                 server.Stop();
             }
 
-            Console.WriteLine("\nHit enter to continue...");
-            Console.Read();
+            System.Diagnostics.Debug.WriteLine("\nHit enter to continue...");
+            //Console.Read();*/
         }
 
 
