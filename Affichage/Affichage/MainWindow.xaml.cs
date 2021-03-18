@@ -35,12 +35,14 @@ namespace Affichage
         private double voltTemp = 0;
         private bool ascend = true;
         private Thread ReceiveInfo;
+        
 
         public MainWindow()
         {
             InitializeComponent();
             model = new MainWindowModel();
             this.DataContext = model;
+            
             //AddBattementCardiaque(new BattementCardiaque(0, 70));
             //AddBattementCardiaque(new BattementCardiaque(1, 73));
             //AddBattementCardiaque(new BattementCardiaque(4, 65));
@@ -88,7 +90,7 @@ namespace Affichage
 
         private void LoadCsvFile()
         {
-            using (StreamReader sr = new StreamReader("C:\\GEN1873-Affichage\\Fichier csv\\Original Clean.csv"))
+            using (StreamReader sr = new StreamReader("U:\\GEN1873\\Fichier csv\\Original Clean.csv"))
             {
                 //Ignore les deux première ligne
                 sr.ReadLine();
@@ -119,33 +121,39 @@ namespace Affichage
             }
 
         }
-
-        /*********
-         * Trouver une facon d'ajouter matlab
-         * https://www.mathworks.com/matlabcentral/answers/705763-why-am-i-getting-the-error-the-type-or-namespace-mlapp-could-not-be-found-when-building-c-appli
-         * */
-        static void LoadMatlab(string[] args)
+        /*
+        static void LoadMatlab(List<int> data, double time)
         {
 
 
-            /*
+            
             // Create the MATLAB instance
             MLApp.MLApp matlab = new MLApp.MLApp();
 
             // Change to the directory where the function is located
-            matlab.Execute(@"cd c:\temp\example");
+            matlab.Execute(@"cd U:\GEN1873\Affichage");
 
             // Define the output
             object result = null;
 
-            // Call the MATLAB function myfunc
-            matlab.Feval("myfunc", 2, out result, 3.14, 42.0, "world");
+            int[] array = data.ToArray<int>();
 
+            // Call the MATLAB function myfunc
+            matlab.Feval("Traitement", 2, out result, array.Length, time, array);
+            array = null;
+
+            matlab.GetFullMatrix()
             // Display result
             object[] res = result as object[];
 
-            */
-        }
+            if (res != null)
+            {
+                res[0].
+                for(int i = 0; i< res[0]; i++)
+            }
+
+            
+        }*/
 
         public void AddInfoToGraph()
         {
@@ -194,6 +202,11 @@ namespace Affichage
             }
 
         }
+        
+        public static void fft()
+        {
+            
+        }
 
 
         public void listen()
@@ -201,6 +214,9 @@ namespace Affichage
             TcpClient client = null;
             try
             {
+                List<int> data = new List<int>();
+                int volt;
+                double time = 0;
                 int PORT_NO = 8888;
                 string SERVER_IP = "192.168.0.153";
 
@@ -215,17 +231,18 @@ namespace Affichage
                     //---read back the text---
                     byte[] bytesToRead = new byte[client.ReceiveBufferSize];
                     int bytesRead = nwStream.Read(bytesToRead, 0, client.ReceiveBufferSize);
-                    voltTemp = BitConverter.ToInt32(bytesToRead, 0);
-                    Console.WriteLine(voltTemp);
-                    Dispatcher.BeginInvoke(new Action(() =>
+                    volt = BitConverter.ToInt32(bytesToRead, 0);
+                    time += 0.0005;
+                    data.Add(volt);
+                    Console.WriteLine(volt);
+                    if(time >= 1)
                     {
-
-                        if (model.ChartDataVoltage[0].Values.Count > 150)
-                            model.ChartDataVoltage[0].Values.RemoveAt(0);
-
-                        model.ChartDataVoltage[0].Values.Add(new Voltage(temp, voltTemp));
-
-                    }), DispatcherPriority.Background);
+                        //var traitement = new Thread(() => LoadMatlab(data, time));
+                        //traitement.Start();
+                        time = 0;
+                        data.Clear();
+                    }
+                    
                 }
             }
             catch (Exception e)

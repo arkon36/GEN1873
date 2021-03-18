@@ -1,0 +1,11 @@
+% L = % Signal Length
+function [x,y] = Traitement(L, time, data)
+t = linspace(0, 1, L)*time;                             % Time Vector (s)
+Ts = mean(diff(t));                                     % Sampling Time (s)
+Fs = 1/Ts;                                              % Sampling Frequency (Hz)
+Fn = Fs/2;                                              % Nyquist Frequency (Hz)
+aa = fft(data)/L;                                       % Fourier Transform (Scaled)
+Fv = linspace(0, 1, fix(L/2)+1)*Fn;                     % Frequency Vector (One-Sided)
+Iv = 1:length(Fv);                                      % Index Vector
+x = Fv;
+y = abs(aa(Iv))*2;
