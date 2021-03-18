@@ -22,6 +22,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using CenterSpace.NMath.Core;
 
 namespace Affichage
 {
@@ -32,6 +33,8 @@ namespace Affichage
     {
         private MainWindowModel model;
         private double temp;
+        private int time;
+        private bool appRunning;
         private double voltTemp = 0;
         private bool ascend = true;
         private Thread ReceiveInfo;
@@ -42,7 +45,8 @@ namespace Affichage
             InitializeComponent();
             model = new MainWindowModel();
             this.DataContext = model;
-            
+            appRunning = true;
+
             //AddBattementCardiaque(new BattementCardiaque(0, 70));
             //AddBattementCardiaque(new BattementCardiaque(1, 73));
             //AddBattementCardiaque(new BattementCardiaque(4, 65));
@@ -55,16 +59,16 @@ namespace Affichage
             //AddBattementCardiaque(new BattementCardiaque(16, 2000));
             //AddBattementCardiaque(new BattementCardiaque(17, -2000));
             //model.LastBattement = model.ListeBattement.First().Battement;
-            LoadCsvFile();
+            //LoadCsvFile();
 
-            ReceiveInfo = new Thread(new ThreadStart(listen));
-            ReceiveInfo.Start();
+            //ReceiveInfo = new Thread(new ThreadStart(listen));
+            //ReceiveInfo.Start();
 
             Thread addinfo = new Thread(new ThreadStart(tempo));
             addinfo.Start();
 
-            //Thread t = new Thread(new ThreadStart(AddInfoToGraph));
-            //t.Start();
+            Thread t = new Thread(new ThreadStart(AddInfoToGraph));
+            t.Start();
 
         }
 
@@ -90,7 +94,7 @@ namespace Affichage
 
         private void LoadCsvFile()
         {
-            using (StreamReader sr = new StreamReader("U:\\GEN1873\\Fichier csv\\Original Clean.csv"))
+            using (StreamReader sr = new StreamReader("E:\\Alec\\Ecole\\GEN1873 Git Folder\\GEN1873\\Fichier csv\\Original Clean.csv"))
             {
                 //Ignore les deux première ligne
                 sr.ReadLine();
@@ -106,7 +110,7 @@ namespace Affichage
                         temp = temps;
                         if (model.ChartDataVoltage[0].Values != null)
                         {
-                            if (model.ChartDataVoltage[0].Values.Count > 150)
+                            if (model.ChartDataVoltage[0].Values.Count > 12000)
                                 model.ChartDataVoltage[0].Values.RemoveAt(0);
 
                             model.ChartDataVoltage[0].Values.Add(new Voltage(temps, voltage));
@@ -157,7 +161,32 @@ namespace Affichage
 
         public void AddInfoToGraph()
         {
-            while (true)
+            List<double> data = new List<double>();
+            int volt;
+            time = 0;
+            Random rnd = new Random();
+            Console.WriteLine("Connection Open");
+            while (appRunning)
+            {
+                
+                
+                time += 10;
+                volt = rnd.Next(1000, 3000);
+                data.Add(volt);
+                //Process data after 1 seconde
+                if (time % 1000== 0)
+                {
+                    Double[] tempList = data.ToArray();
+                    var traitement = new Thread(() => fft(tempList, time));
+                    traitement.Start();
+                    data.Clear();
+                }
+                Thread.Sleep(10);
+
+            }
+
+            /*
+            while (appRunning)
             {
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
@@ -175,7 +204,7 @@ namespace Affichage
                         voltTemp = voltTemp - 0.1;
 
                     temp += 0.1;
-                    if (model.ChartDataVoltage[0].Values.Count > 150)
+                    if (model.ChartDataVoltage[0].Values.Count > 140)
                         model.ChartDataVoltage[0].Values.RemoveAt(0);
 
                     model.ChartDataVoltage[0].Values.Add(new Voltage(temp, voltTemp));
@@ -183,7 +212,7 @@ namespace Affichage
                 }), DispatcherPriority.Background);
                 Thread.Sleep(1000);
             }
-
+            */
         }
 
 
@@ -191,7 +220,7 @@ namespace Affichage
         {
             int tempo = 0;
             Random random = new Random();
-            while (true)
+            while (appRunning)
             {
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
@@ -203,9 +232,46 @@ namespace Affichage
 
         }
         
-        public static void fft()
+        public void fft(Double[] data, int sampleTime)
         {
+            //
+            // Simple example to compute a forward 1D real 1024 point FFT
+            //
+
+            // Create some random signal data.
+
+            var dataVector = new DoubleVector(data);
+
+            // Compute the FFT
+            // This will create a complex conjugate symmetric packed result.
+            var fft = new DoubleForward1DFFT(dataVector.Count());
+            DoubleVector fftresult = fft.FFT(dataVector);
+            double timeInDouble;
+            sampleTime = sampleTime - 1000;
             
+            for (int j = 0; j < fftresult.Length-1; j++)
+            {
+                timeInDouble = sampleTime / 1000;
+
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+
+                    if (model.ChartDataVoltage[0].Values != null)
+                    {
+                        if (model.ChartDataVoltage[0].Values.Count > 6000)
+                            model.ChartDataVoltage[0].Values.RemoveAt(0);
+
+                        model.ChartDataVoltage[0].Values.Add(new Voltage(timeInDouble, fftresult[j]));
+                    }
+                    else
+                    {
+                        model.ChartDataVoltage[0].Values = new ChartValues<Voltage> { new Voltage(timeInDouble, fftresult[j]) };
+                    }
+
+                }), DispatcherPriority.Background);
+                sampleTime += 10;
+            }
+
         }
 
 
@@ -214,16 +280,16 @@ namespace Affichage
             TcpClient client = null;
             try
             {
-                List<int> data = new List<int>();
+                List<double> data = new List<double>();
                 int volt;
-                double time = 0;
+                time = 0;
                 int PORT_NO = 8888;
                 string SERVER_IP = "192.168.0.153";
 
                 //---create a TCPClient object at the IP and port no.---
                 client = new TcpClient(SERVER_IP, PORT_NO);
 
-                while (true)
+                while (appRunning)
                 {
                     Console.WriteLine("Connection Open");
                     NetworkStream nwStream = client.GetStream();
@@ -232,14 +298,15 @@ namespace Affichage
                     byte[] bytesToRead = new byte[client.ReceiveBufferSize];
                     int bytesRead = nwStream.Read(bytesToRead, 0, client.ReceiveBufferSize);
                     volt = BitConverter.ToInt32(bytesToRead, 0);
-                    time += 0.0005;
+                    time += 5;
                     data.Add(volt);
                     Console.WriteLine(volt);
-                    if(time >= 1)
+                    //Process data after 1 seconde
+                    if(time % 1000 == 0)
                     {
-                        //var traitement = new Thread(() => LoadMatlab(data, time));
-                        //traitement.Start();
-                        time = 0;
+                        Double[] tempList = data.ToArray();
+                        var traitement = new Thread(() => fft(tempList, time));
+                        traitement.Start();
                         data.Clear();
                     }
                     
@@ -256,6 +323,9 @@ namespace Affichage
             }
         }
 
-
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            appRunning = false;
+        }
     }
 }

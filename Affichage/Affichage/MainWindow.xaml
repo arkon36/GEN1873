@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Affichage"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" xmlns:Wpf="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf" x:Class="Affichage.MainWindow"
         mc:Ignorable="d"
-        Title="Information" Height="306.475" Width="543.58">
+        Title="Information" Height="306.475" Width="543.58" Closed="Window_Closed">
     <Grid>
 
         <TabControl x:Name="tabControl" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
@@ -34,7 +34,7 @@
             </TabItem>
             <TabItem Header="Reponse Cardiaque">
                 <Grid Background="#FFE5E5E5">
-                    <Wpf:CartesianChart  Margin="10,8,10,10" Series="{Binding ChartDataVoltage}" TabIndex="2147483645" Zoom="{Binding ZoomingModeVoltage}" Hoverable="False" DataTooltip="{x:Null}">
+                    <Wpf:CartesianChart  Margin="10,8,10,10" Series="{Binding ChartDataVoltage}" TabIndex="2147483645" Zoom="{Binding ZoomingModeVoltage}" Hoverable="False" DataTooltip="{x:Null}" DisableAnimations="True">
                         <Wpf:CartesianChart.AxisY>
                             <Wpf:Axis Title ="Voltage" Foreground="Black"/>
                         </Wpf:CartesianChart.AxisY>
