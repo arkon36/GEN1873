@@ -45,7 +45,7 @@ namespace Affichage
             //AddBattementCardiaque(new BattementCardiaque(1, 73));
             //AddBattementCardiaque(new BattementCardiaque(4, 65));
             //AddBattementCardiaque(new BattementCardiaque(9, 68));
-            
+
 
             //AddBattementCardiaque(new BattementCardiaque(10, 15));
             //AddBattementCardiaque(new BattementCardiaque(14, 28));
@@ -61,25 +61,34 @@ namespace Affichage
             Thread addinfo = new Thread(new ThreadStart(tempo));
             addinfo.Start();
 
-            Thread t = new Thread(new ThreadStart(AddInfoToGraph));
-            t.Start();
+            //Thread t = new Thread(new ThreadStart(AddInfoToGraph));
+            //t.Start();
 
         }
 
         private void AddBattementCardiaque(BattementCardiaque battement)
         {
             model.ListeBattement.Insert(0, battement);
-            if(model.ChartData[0].Values != null)
+            if (model.ChartData[0].Values != null)
+            {
+                if (model.ListeBattement.Count > 50)
+                {
+                    model.ListeBattement.RemoveAt(model.ListeBattement.Count - 1);
+                    model.ChartData[0].Values.RemoveAt(0);
+                }
                 model.ChartData[0].Values.Add(battement);
+            }
             else
+            {
                 model.ChartData[0].Values = model.ListeBattement.AsChartValues();
+            }
             model.LastBattement = model.ListeBattement.First().Battement;
 
         }
 
         private void LoadCsvFile()
         {
-            using (StreamReader sr = new StreamReader("E:\\Alec\\Ecole\\GEN1873 Git Folder\\GEN1873\\Fichier csv\\Original Clean.csv"))
+            using (StreamReader sr = new StreamReader("C:\\GEN1873-Affichage\\Fichier csv\\Original Clean.csv"))
             {
                 //Ignore les deux première ligne
                 sr.ReadLine();
@@ -97,8 +106,8 @@ namespace Affichage
                         {
                             if (model.ChartDataVoltage[0].Values.Count > 150)
                                 model.ChartDataVoltage[0].Values.RemoveAt(0);
-                            else
-                                model.ChartDataVoltage[0].Values.Add(new Voltage(temps, voltage));
+
+                            model.ChartDataVoltage[0].Values.Add(new Voltage(temps, voltage));
                         }
                         else
                         {
@@ -120,57 +129,50 @@ namespace Affichage
 
 
             /*
-            // Create the MATLAB instance 
+            // Create the MATLAB instance
             MLApp.MLApp matlab = new MLApp.MLApp();
 
-            // Change to the directory where the function is located 
+            // Change to the directory where the function is located
             matlab.Execute(@"cd c:\temp\example");
 
-            // Define the output 
+            // Define the output
             object result = null;
 
             // Call the MATLAB function myfunc
             matlab.Feval("myfunc", 2, out result, 3.14, 42.0, "world");
 
-            // Display result 
+            // Display result
             object[] res = result as object[];
 
             */
         }
 
-        private void button_Click(object sender, RoutedEventArgs e)
-        {
-            Thread t = new Thread(new ThreadStart(AddInfoToGraph));
-            t.Start();
-
-        }
-
         public void AddInfoToGraph()
         {
-            while(true)
+            while (true)
             {
                 Dispatcher.BeginInvoke(new Action(() =>
-                            {
-                                if(voltTemp < 0)
-                                {
-                                    ascend = true;
-                                }
-                                else if(voltTemp > 15)
-                                {
-                                    ascend = false;
-                                }
-                                if(ascend)
-                                    voltTemp = voltTemp + 0.1;
-                                else
-                                    voltTemp = voltTemp - 0.1;
+                {
+                    if (voltTemp < 0)
+                    {
+                        ascend = true;
+                    }
+                    else if (voltTemp > 15)
+                    {
+                        ascend = false;
+                    }
+                    if (ascend)
+                        voltTemp = voltTemp + 0.1;
+                    else
+                        voltTemp = voltTemp - 0.1;
 
-                                temp += 0.1;
-                                if (model.ChartDataVoltage[0].Values.Count > 150)
-                                    model.ChartDataVoltage[0].Values.RemoveAt(0);
-                                else
-                                    model.ChartDataVoltage[0].Values.Add(new Voltage(temp, voltTemp));
+                    temp += 0.1;
+                    if (model.ChartDataVoltage[0].Values.Count > 150)
+                        model.ChartDataVoltage[0].Values.RemoveAt(0);
 
-                            }), DispatcherPriority.Background);
+                    model.ChartDataVoltage[0].Values.Add(new Voltage(temp, voltTemp));
+
+                }), DispatcherPriority.Background);
                 Thread.Sleep(1000);
             }
 
@@ -179,7 +181,7 @@ namespace Affichage
 
         public void tempo()
         {
-            int tempo = 18;
+            int tempo = 0;
             Random random = new Random();
             while (true)
             {
@@ -188,7 +190,7 @@ namespace Affichage
                     AddBattementCardiaque(new BattementCardiaque(tempo, random.Next(50, 100)));
                     tempo = tempo + 1;
                 }), DispatcherPriority.Background);
-                Thread.Sleep(10000);
+                Thread.Sleep(3000);
             }
 
         }
@@ -196,129 +198,45 @@ namespace Affichage
 
         public void listen()
         {
-            TcpListener listener = null;
+            TcpClient client = null;
             try
             {
-                int PORT_NO = 5000;
-                string SERVER_IP = "127.0.0.1";
-                IPAddress localAdd = IPAddress.Parse(SERVER_IP);
-                listener = new TcpListener(localAdd, PORT_NO);
-                
-                Console.WriteLine("Listening...");
-                listener.Start();
+                int PORT_NO = 8888;
+                string SERVER_IP = "192.168.0.153";
+
+                //---create a TCPClient object at the IP and port no.---
+                client = new TcpClient(SERVER_IP, PORT_NO);
+
                 while (true)
                 {
-                    //---incoming client connected---
-                    TcpClient client = listener.AcceptTcpClient();
-
-                    //---get the incoming data through a network stream---
+                    Console.WriteLine("Connection Open");
                     NetworkStream nwStream = client.GetStream();
-                    byte[] buffer = new byte[client.ReceiveBufferSize];
 
-                    //---read incoming stream---
-                    int bytesRead = nwStream.Read(buffer, 0, client.ReceiveBufferSize);
-
-                    //---convert the data received into a string---
-                    string dataReceived = Encoding.ASCII.GetString(buffer, 0, bytesRead);
-                    Console.WriteLine("Received : " + dataReceived);
-
-                    //---write back the text to the client---
-                    byte[] bytesToSend = ASCIIEncoding.ASCII.GetBytes("Message received");
-                    Console.WriteLine("Sending : " + "Message received");
-                    nwStream.Write(bytesToSend, 0, bytesToSend.Length);
-                    client.Close();
-
-                    Console.ReadLine();
-                }
-            }
-            catch (System.Net.Sockets.SocketException e)
-            {
-                System.Diagnostics.Debug.WriteLine("SocketException: {0}", e);
-            }
-            finally
-            {
-                // Stop listening for new clients.
-                listener.Stop();
-            }
-            
-
-
-
-
-
-
-
-
-
-
-
-            /*TcpListener server = null;
-            try
-            {
-                // Set the TcpListener on port 13000.
-                Int32 port = 13000;
-                IPAddress localAddr = IPAddress.Parse("192.168.0.162");
-
-                // TcpListener server = new TcpListener(port);
-                server = new TcpListener(localAddr, port);
-
-                // Start listening for client requests.
-                server.Start();
-
-                // Buffer for reading data
-                Byte[] bytes = new Byte[256];
-                String data = null;
-
-                // Enter the listening loop.
-                while (true)
-                {
-                    System.Diagnostics.Debug.WriteLine("Waiting for a connection... ");
-
-                    // Perform a blocking call to accept requests.
-                    // You could also use server.AcceptSocket() here.
-                    TcpClient client = server.AcceptTcpClient();
-                    System.Diagnostics.Debug.WriteLine("Connected!");
-
-                    data = null;
-
-                    // Get a stream object for reading and writing
-                    NetworkStream stream = client.GetStream();
-
-                    int i;
-
-                    // Loop to receive all the data sent by the client.
-                    while ((i = stream.Read(bytes, 0, bytes.Length)) != 0)
+                    //---read back the text---
+                    byte[] bytesToRead = new byte[client.ReceiveBufferSize];
+                    int bytesRead = nwStream.Read(bytesToRead, 0, client.ReceiveBufferSize);
+                    voltTemp = BitConverter.ToInt32(bytesToRead, 0);
+                    Console.WriteLine(voltTemp);
+                    Dispatcher.BeginInvoke(new Action(() =>
                     {
-                        // Translate data bytes to a ASCII string.
-                        data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
-                        System.Diagnostics.Debug.WriteLine("Received: {0}", data);
 
-                        // Process the data sent by the client.
-                        data = data.ToUpper();
+                        if (model.ChartDataVoltage[0].Values.Count > 150)
+                            model.ChartDataVoltage[0].Values.RemoveAt(0);
 
-                        byte[] msg = System.Text.Encoding.ASCII.GetBytes(data);
+                        model.ChartDataVoltage[0].Values.Add(new Voltage(temp, voltTemp));
 
-                        // Send back a response.
-                        stream.Write(msg, 0, msg.Length);
-                        System.Diagnostics.Debug.WriteLine("Sent: {0}", data);
-                    }
-
-                    // Shutdown and end connection
-                    client.Close();
+                    }), DispatcherPriority.Background);
                 }
             }
-            catch (System.Net.Sockets.SocketException e)
+            catch (Exception e)
             {
                 System.Diagnostics.Debug.WriteLine("SocketException: {0}", e);
             }
             finally
             {
                 // Stop listening for new clients.
-                server.Stop();
+                client.Close();
             }
-
-            System.Diagnostics.Debug.WriteLine("\nHit enter to continue...");
-            //Console.Read();*/
         }
 
 
