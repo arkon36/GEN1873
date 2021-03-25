@@ -11,7 +11,7 @@ namespace SendInfo
         static void Main(string[] args)
         {
             //---data to send to the server---
-            string textToSend = Console.ReadLine();
+            string textToSend = "1343";
             while (textToSend != "exit")
             {
                 
