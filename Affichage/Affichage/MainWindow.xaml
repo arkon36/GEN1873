@@ -4,7 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Affichage"
-        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" xmlns:Wpf="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf" xmlns:toolkit="http://schemas.microsoft.com/winfx/2006/xaml/presentation/toolkit" x:Class="Affichage.MainWindow"
+        xmlns:Wpf="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+        xmlns:oxy="http://oxyplot.org/wpf"
+        x:Class="Affichage.MainWindow"
         mc:Ignorable="d"
         Title="Information" Height="306.475" Width="543.58" Closed="Window_Closed">
     <Grid>
@@ -22,7 +24,7 @@
                     </ListView>
                     <Label Height="39" HorizontalAlignment="Left" Margin="12,56,0,0" x:Name="labelLastBattement" VerticalAlignment="Top" Width="207" Content="{Binding LastBattement}" FontSize="24" FontWeight="Bold" />
                     <Label Content="Battement Actuel" HorizontalAlignment="Left" Margin="12,12,0,0" x:Name="labelBattementAct" FontWeight="Bold" FontSize="24" Width="207" Height="39" VerticalAlignment="Top" />
-                    <Wpf:CartesianChart  Margin="235,8,10,10" Series="{Binding ChartData}" TabIndex="2147483645" Zoom="{Binding ZoomingMode}">
+                    <Wpf:CartesianChart  Margin="235,8,10,10" Series="{Binding ChartData}" TabIndex="2147483645">
                         <Wpf:CartesianChart.AxisY>
                             <Wpf:Axis Title ="Battement (Battement/Minute)" Foreground="Black"/>
                         </Wpf:CartesianChart.AxisY>
@@ -34,18 +36,39 @@
             </TabItem>
             <TabItem Header="Reponse Cardiaque">
                 <Grid Background="#FFE5E5E5">
-                    <toolkit:Chart  Name="lineChart" Title="Line Series Demo" VerticalAlignment="Top" Margin="33,611,440,0" Height="254">
+                    <!--<toolkit:Chart  Name="lineChart" Title="Line Series Demo" VerticalAlignment="Top" Margin="33,611,440,0" Height="254">
                         <toolkit:LineSeries  DependentValuePath="Value" IndependentValuePath="Key" ItemsSource="{Binding}" IsSelectionEnabled="True"/>
-                    </toolkit:Chart>
-                    <Wpf:CartesianChart  Margin="10,8,10,10" Series="{Binding ChartDataVoltage}" TabIndex="2147483645" Zoom="{Binding ZoomingModeVoltage}" Hoverable="False" DataTooltip="{x:Null}" DisableAnimations="True">
+                    </toolkit:Chart>-->
+                    <Wpf:CartesianChart  Margin="10,8,10,10" Series="{Binding ChartDataVoltage}" TabIndex="2147483645" Hoverable="False" DataTooltip="{x:Null}" DisableAnimations="True">
                         <Wpf:CartesianChart.AxisY>
-                            <Wpf:Axis Title ="Voltage" Foreground="Black"/>
+                            <Wpf:Axis Title ="Voltage (V)" Foreground="Black"/>
                         </Wpf:CartesianChart.AxisY>
                         <Wpf:CartesianChart.AxisX>
                             <Wpf:Axis Title="Temps (seconde)" Foreground="#FF303030"/>
                         </Wpf:CartesianChart.AxisX>
                     </Wpf:CartesianChart>
 
+                </Grid>
+            </TabItem>
+            <TabItem Header="Analyse Spectrale">
+                <Grid Background="#FFE5E5E5">
+                    <Wpf:CartesianChart  Margin="10,8,10,10" Series="{Binding ChartSpectre}" TabIndex="2147483645" Hoverable="False" DataTooltip="{x:Null}" DisableAnimations="True">
+                        <Wpf:CartesianChart.AxisY>
+                            <Wpf:Axis Title ="Amplitude" Foreground="Black"/>
+                        </Wpf:CartesianChart.AxisY>
+                        <Wpf:CartesianChart.AxisX>
+                            <Wpf:Axis Title="Fréquence (Hz)" Foreground="#FF303030"/>
+                        </Wpf:CartesianChart.AxisX>
+                    </Wpf:CartesianChart>
+                    <!--<oxy:Plot Title="Analyse Spectral">
+                        <oxy:Plot.Series>
+                            <oxy:LineSeries ItemsSource="{Binding spectralAnalysis}"/>
+                        </oxy:Plot.Series>
+                        <oxy:Plot.Axes>
+                            <oxy:LinearAxis Position="Bottom" Title="Fréquence" Minimum="0" Maximum="20" />
+                            <oxy:LinearAxis Position="Left" Title="Amplitude" Minimum="0" Maximum="10" />
+                        </oxy:Plot.Axes>
+                    </oxy:Plot>-->
                 </Grid>
             </TabItem>
         </TabControl>

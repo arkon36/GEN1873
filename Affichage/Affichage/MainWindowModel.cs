@@ -21,6 +21,7 @@ namespace Affichage
 
         public SeriesCollection ChartData { get; set; }
         public SeriesCollection ChartDataVoltage { get; set; }
+        public SeriesCollection ChartSpectre { get; set; }
 
         private ZoomingOptions _zoomingMode;
         public ZoomingOptions ZoomingMode
@@ -45,7 +46,9 @@ namespace Affichage
         }
 
         public ObservableCollection<BattementCardiaque> ListeBattement { get; set; }
-        
+
+        public IList<OxyPlot.DataPoint> spectralAnalysis { get; set; }
+
         private int lastBattement;
         public int LastBattement
         {
@@ -63,6 +66,9 @@ namespace Affichage
         public MainWindowModel()
         {
             ListeBattement = new ObservableCollection<BattementCardiaque>();
+
+            spectralAnalysis = new ObservableCollection<OxyPlot.DataPoint>();
+            
 
             ChartData = new SeriesCollection()
             {
@@ -86,7 +92,31 @@ namespace Affichage
                 Configuration = new CartesianMapper<Voltage>()
                 .X(point => point.temps) // Define a function that returns a value that should map to the x-axis
                 .Y(point => point.voltage), // Define a function that returns a value that should map to the y-axis
-                Title = "Réponse impulsionnel du coeur",
+                Title = "Battement Cardiaque",
+                PointGeometry = null
+                }
+            };
+
+            ChartDataVoltage = new SeriesCollection()
+            {
+                new LineSeries()
+                {
+                Configuration = new CartesianMapper<Voltage>()
+                .X(point => point.temps) // Define a function that returns a value that should map to the x-axis
+                .Y(point => point.voltage), // Define a function that returns a value that should map to the y-axis
+                Title = "Réponse brute du radar",
+                PointGeometry = null
+                }
+            };
+
+            ChartSpectre = new SeriesCollection()
+            {
+                new LineSeries()
+                {
+                Configuration = new CartesianMapper<Spectre>()
+                .X(point => point.frequence) // Define a function that returns a value that should map to the x-axis
+                .Y(point => point.amplitude), // Define a function that returns a value that should map to the y-axis
+                Title = "Spectre d'Amplitude",
                 PointGeometry = null
                 }
             };
@@ -171,5 +201,16 @@ namespace Affichage
         }
     }
 
+    public class Spectre
+    {
+        public double amplitude;
+        public double frequence;
+
+        public Spectre(double _frequence, double _amplitude)
+        {
+            frequence = _frequence;
+            amplitude = _amplitude;
+        }
+    }
 
 }
