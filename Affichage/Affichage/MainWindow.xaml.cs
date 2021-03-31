@@ -36,6 +36,7 @@ namespace Affichage
         private double temp;
         private double timeInterval = 0.05;
         private double time = 0;
+        private int timeBattementCardiaque = 0;
         private bool appRunning;
         private double voltTemp = 0;
         private bool ascend = true;
@@ -67,21 +68,40 @@ namespace Affichage
 
         private void AddBattementCardiaque(BattementCardiaque battement)
         {
-            model.ListeBattement.Insert(0, battement);
+            Dispatcher.Invoke(new Action(() =>
+            {
+                model.ListeBattement.Insert(0, battement);
+            }), DispatcherPriority.Normal);
+            
             if (model.ChartData[0].Values != null)
             {
                 if (model.ListeBattement.Count > 50)
                 {
-                    model.ListeBattement.RemoveAt(model.ListeBattement.Count - 1);
-                    model.ChartData[0].Values.RemoveAt(0);
+                    Dispatcher.Invoke(new Action(() =>
+                    {
+                        model.ListeBattement.RemoveAt(model.ListeBattement.Count - 1);
+                        model.ChartData[0].Values.RemoveAt(0);
+                    }), DispatcherPriority.Normal);
                 }
-                model.ChartData[0].Values.Add(battement);
+                Dispatcher.Invoke(new Action(() =>
+                {
+                    model.ChartData[0].Values.Add(battement);
+                }), DispatcherPriority.Normal);
+                
             }
             else
             {
-                model.ChartData[0].Values = model.ListeBattement.AsChartValues();
+                Dispatcher.Invoke(new Action(() =>
+                {
+                    model.ChartData[0].Values = model.ListeBattement.AsChartValues();
+                }), DispatcherPriority.Normal); 
             }
-            model.LastBattement = model.ListeBattement.First().Battement;
+            Dispatcher.Invoke(new Action(() =>
+            {
+                model.LastBattement = model.ListeBattement.First().Battement;
+            }), DispatcherPriority.Normal);
+
+            
 
         }
 
@@ -118,39 +138,6 @@ namespace Affichage
             }
 
         }
-        /*
-        static void LoadMatlab(List<int> data, double time)
-        {
-
-
-            
-            // Create the MATLAB instance
-            MLApp.MLApp matlab = new MLApp.MLApp();
-
-            // Change to the directory where the function is located
-            matlab.Execute(@"cd U:\GEN1873\Affichage");
-
-            // Define the output
-            object result = null;
-
-            int[] array = data.ToArray<int>();
-
-            // Call the MATLAB function myfunc
-            matlab.Feval("Traitement", 2, out result, array.Length, time, array);
-            array = null;
-
-            matlab.GetFullMatrix()
-            // Display result
-            object[] res = result as object[];
-
-            if (res != null)
-            {
-                res[0].
-                for(int i = 0; i< res[0]; i++)
-            }
-
-            
-        }*/
 
         public void AddInfoToGraph(double[] data)
         {
@@ -176,107 +163,8 @@ namespace Affichage
                 }), DispatcherPriority.Background);
                 time += 0.250;
             }
-                
-                
-
-        
-
-            /*
-            while (appRunning)
-            {
-                Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    if (voltTemp < 0)
-                    {
-                        ascend = true;
-                    }
-                    else if (voltTemp > 15)
-                    {
-                        ascend = false;
-                    }
-                    if (ascend)
-                        voltTemp = voltTemp + 0.1;
-                    else
-                        voltTemp = voltTemp - 0.1;
-
-                    temp += 0.1;
-                    if (model.ChartDataVoltage[0].Values.Count > 140)
-                        model.ChartDataVoltage[0].Values.RemoveAt(0);
-
-                    model.ChartDataVoltage[0].Values.Add(new Voltage(temp, voltTemp));
-
-                }), DispatcherPriority.Background);
-                Thread.Sleep(1000);
-            }
-            */
         }
 
-
-        public void tempo()
-        {
-            int tempo = 0;
-            Random random = new Random();
-            while (appRunning)
-            {
-                Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    AddBattementCardiaque(new BattementCardiaque(tempo, random.Next(50, 100)));
-                    tempo = tempo + 1;
-                }), DispatcherPriority.Background);
-                Thread.Sleep(3000);
-            }
-
-        }
-
-        /*  public void fft(Double[] data, int sampleTime)
-          {
-
-              for(int i = 0; i<)
-
-
-
-
-              //
-              // Simple example to compute a forward 1D real 1024 point FFT
-              //
-
-              // Create some random signal data.
-
-              var dataVector = new DoubleVector(data);
-
-              // Compute the FFT
-              // This will create a complex conjugate symmetric packed result.
-              var fft = new DoubleForward1DFFT(dataVector.Count());
-              DoubleVector fftresult = fft.FFT(dataVector);
-              double timeInDouble;
-              sampleTime = sampleTime - 1000;
-
-              for (int j = 0; j < fftresult.Length-1; j++)
-              {
-                  timeInDouble = sampleTime / 1000;
-
-                  Dispatcher.BeginInvoke(new Action(() =>
-                  {
-
-                      if (model.ChartDataVoltage[0].Values != null)
-                      {
-                          if (model.ChartDataVoltage[0].Values.Count > 6000)
-                              model.ChartDataVoltage[0].Values.RemoveAt(0);
-
-                          model.ChartDataVoltage[0].Values.Add(new Voltage(timeInDouble, fftresult[j]));
-                      }
-                      else
-                      {
-                          model.ChartDataVoltage[0].Values = new ChartValues<Voltage> { new Voltage(timeInDouble, fftresult[j]) };
-                      }
-
-                  }), DispatcherPriority.Background);
-                  sampleTime += 10;
-              }
-
-          }
-
-          */
         public void FFT(double[] value)
         {
 
@@ -300,11 +188,17 @@ namespace Affichage
 
             }
             MathNet.Numerics.IntegralTransforms.Fourier.Forward(tmp, MathNet.Numerics.IntegralTransforms.FourierOptions.Matlab);
-            for (int i = 0; i < tmp.Length/2+1; i++)
+            double maxValue = 0;
+            double freqMaxValue = 0;
+            for (int i = 1; i < tmp.Length/2; i++)
             {
                 //Console.WriteLine(Math.Abs(Math.Sqrt(Math.Pow(tmp[i].Real, 2) + Math.Pow(tmp[i].Imaginary, 2))) + "         " + (Math.Pow(tmp[i].Real, 2) + Math.Pow(tmp[i].Imaginary, 2)) + "         " + Math.Sqrt(Math.Pow(tmp[i].Real, 2) + Math.Pow(tmp[i].Imaginary, 2)));
-                double mag = (2.0 / tmp.Length) * (Math.Abs(Math.Sqrt(Math.Pow(tmp[i].Real, 2) + Math.Pow(tmp[i].Imaginary, 2))));
-
+                double mag = (Math.Abs(Math.Sqrt(Math.Pow(tmp[i].Real, 2) + Math.Pow(tmp[i].Imaginary, 2))));
+                if (mag > maxValue)
+                {
+                    maxValue = mag;
+                    freqMaxValue = hzPerSample * i;
+                }
                 if (model.ChartSpectre[0].Values != null)
                 {
                     Dispatcher.Invoke(new Action(() =>
@@ -320,20 +214,18 @@ namespace Affichage
                     }), DispatcherPriority.Normal);
                 }
             }
+            timeBattementCardiaque = timeBattementCardiaque + 10;
+            AddBattementCardiaque(new BattementCardiaque(timeBattementCardiaque, Convert.ToInt32(freqMaxValue * 60)));
+
         }
 
 
-        public void processData(string info, int index)
+        public string processData(string info)
         {
+            string lastInfo = "";
             info = info.Trim('\r', '\n');
             String[] data = info.Split(new string[] { "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
-            //if (index > 0)
-            //{
-            //    while(threads[index - 1].IsAlive)
-            //    {
-            //        Thread.Sleep(1);
-            //    }
-            //}
+
             for (int i = 0; i < data.Length; i++)
             {
                 if (double.TryParse(data[i], NumberStyles.Any, CultureInfo.InvariantCulture, out double value))
@@ -341,7 +233,7 @@ namespace Affichage
                     //Il faut un buffer sur les donné lu, parce que les valeur recu sur c# ne sont pas entiere (ex: 1 suivi de 930 au lieu de 1930)
                     //donc il faut eviter que si une de ces valeur se retrouve a la fin du string representant toutes les valeur lu dans l'intervalle
                     //de temps, il ne faut pas que cette valeur coupé en deux soit considérer dans l'affichage
-                    if (value >= 0 && value <= 10000)
+                    if (value >= 1000 && value <= 10000)
                     {
                         value = value * 3.3 / 4096;
                         
@@ -372,9 +264,15 @@ namespace Affichage
                             
                         }
                     }
+                    else if(i == data.Length - 1)
+                    {
+                        lastInfo = data[i];
+                    }
+
 
                 }
             }
+            return lastInfo;
         }
 
         public void listen()
@@ -401,9 +299,9 @@ namespace Affichage
                     while ((bytes = nwStream.Read(dataReceive, 0, dataReceive.Length)) != 0)
                     {
                         
-                        responseData = Encoding.ASCII.GetString(dataReceive, 0, bytes);
-                        Console.Write(responseData);
-                        processData(responseData, 0);
+                        responseData = responseData + Encoding.ASCII.GetString(dataReceive, 0, bytes);
+                        //Console.Write(responseData);
+                        responseData = processData(responseData);
                         Thread.Sleep(1000);
                     }
                 }

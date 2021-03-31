@@ -23,7 +23,7 @@
                         </ListView.View>
                     </ListView>
                     <Label Height="39" HorizontalAlignment="Left" Margin="12,56,0,0" x:Name="labelLastBattement" VerticalAlignment="Top" Width="207" Content="{Binding LastBattement}" FontSize="24" FontWeight="Bold" />
-                    <Label Content="Battement Actuel" HorizontalAlignment="Left" Margin="12,12,0,0" x:Name="labelBattementAct" FontWeight="Bold" FontSize="24" Width="207" Height="39" VerticalAlignment="Top" />
+                    <Label Content="BPM" HorizontalAlignment="Left" Margin="12,12,0,0" x:Name="labelBattementAct" FontWeight="Bold" FontSize="24" Width="207" Height="39" VerticalAlignment="Top" />
                     <Wpf:CartesianChart  Margin="235,8,10,10" Series="{Binding ChartData}" TabIndex="2147483645">
                         <Wpf:CartesianChart.AxisY>
                             <Wpf:Axis Title ="Battement (Battement/Minute)" Foreground="Black"/>
@@ -54,10 +54,17 @@
                 <Grid Background="#FFE5E5E5">
                     <Wpf:CartesianChart  Margin="10,8,10,10" Series="{Binding ChartSpectre}" TabIndex="2147483645" Hoverable="False" DataTooltip="{x:Null}" DisableAnimations="True">
                         <Wpf:CartesianChart.AxisY>
-                            <Wpf:Axis Title ="Amplitude" Foreground="Black"/>
+                            <Wpf:Axis Title ="Amplitude" Foreground="Black">
+                                
+                            </Wpf:Axis>
                         </Wpf:CartesianChart.AxisY>
                         <Wpf:CartesianChart.AxisX>
-                            <Wpf:Axis Title="Fréquence (Hz)" Foreground="#FF303030"/>
+                            <Wpf:Axis Title="Fréquence (Hz)" Foreground="#FF303030">
+                                <Wpf:Axis.Separator>
+                                    <Wpf:Separator IsEnabled="False" Step="1"/>
+                                </Wpf:Axis.Separator>
+                            </Wpf:Axis>
+
                         </Wpf:CartesianChart.AxisX>
                     </Wpf:CartesianChart>
                     <!--<oxy:Plot Title="Analyse Spectral">

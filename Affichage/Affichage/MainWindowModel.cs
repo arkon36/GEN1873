@@ -93,7 +93,7 @@ namespace Affichage
                 .X(point => point.temps) // Define a function that returns a value that should map to the x-axis
                 .Y(point => point.voltage), // Define a function that returns a value that should map to the y-axis
                 Title = "Battement Cardiaque",
-                PointGeometry = null
+                PointGeometry = DefaultGeometries.Circle
                 }
             };
 
@@ -106,6 +106,7 @@ namespace Affichage
                 .Y(point => point.voltage), // Define a function that returns a value that should map to the y-axis
                 Title = "Réponse brute du radar",
                 PointGeometry = null
+                
                 }
             };
 
@@ -117,9 +118,13 @@ namespace Affichage
                 .X(point => point.frequence) // Define a function that returns a value that should map to the x-axis
                 .Y(point => point.amplitude), // Define a function that returns a value that should map to the y-axis
                 Title = "Spectre d'Amplitude",
-                PointGeometry = null
+                Fill = System.Windows.Media.Brushes.Transparent,
+                PointGeometry = DefaultGeometries.Circle
                 }
             };
+           // ChartArea ca = ChartSpectre.ChartAreas[0];
+
+          //  Axis ax = ca.AxisX;
 
             ZoomingModeVoltage = ZoomingOptions.Xy;
 
