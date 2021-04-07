@@ -47,8 +47,6 @@ namespace Affichage
 
         public ObservableCollection<BattementCardiaque> ListeBattement { get; set; }
 
-        public IList<OxyPlot.DataPoint> spectralAnalysis { get; set; }
-
         private int lastBattement;
         public int LastBattement
         {
@@ -66,9 +64,7 @@ namespace Affichage
         public MainWindowModel()
         {
             ListeBattement = new ObservableCollection<BattementCardiaque>();
-
-            spectralAnalysis = new ObservableCollection<OxyPlot.DataPoint>();
-            
+           
 
             ChartData = new SeriesCollection()
             {

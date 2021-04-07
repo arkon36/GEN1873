@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<Affichage>
+	<address>
+		<Ip>192.168.0.179</Ip>
+		<Port>8888</Port>
+	</address>
+	<SamplingRate>0.05</SamplingRate>
+	<Data>
+		<Range>200</Range>
+		<Min>1000</Min>
+		<Max>10000</Max>
+	</Data>
+</Affichage>

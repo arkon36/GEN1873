@@ -1,29 +1,16 @@
 ﻿using LiveCharts;
-using LiveCharts.Configurations;
 using LiveCharts.Helpers;
-using LiveCharts.Wpf;
-using OxyPlot;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Threading;
-
+using System.Xml;
 
 namespace Affichage
 {
@@ -34,38 +21,38 @@ namespace Affichage
     {
         private MainWindowModel model;
         private double temp;
-        private double timeInterval = 0.05;
+        private double timeInterval;
         private double time = 0;
         private int timeBattementCardiaque = 0;
         private bool appRunning;
-        private double voltTemp = 0;
-        private bool ascend = true;
         private Thread ReceiveInfo;
         private List<double> voltage = new List<double>();
+        private int PORT_NO;
+        private string SERVER_IP;
+        private double minValue = 0;
+        private double maxValue = 0;
+        private int signalRange;
 
 
         public MainWindow()
         {
             InitializeComponent();
             model = new MainWindowModel();
+            LoadConfigFile();
             this.DataContext = model;
             appRunning = true;
-
-            
 
             //LoadCsvFile();
 
             ReceiveInfo = new Thread(new ThreadStart(listen));
             ReceiveInfo.Start();
-
-            //Thread addinfo = new Thread(new ThreadStart(tempo));
-            //addinfo.Start();
-
-            //Thread t = new Thread(new ThreadStart(AddInfoToGraph));
-            //t.Start();
-
         }
 
+
+        /// <summary>
+        /// Add a heartbeat to the graph
+        /// </summary>
+        /// <param name="battement">the heartbeat</param>
         private void AddBattementCardiaque(BattementCardiaque battement)
         {
             Dispatcher.Invoke(new Action(() =>
@@ -105,6 +92,30 @@ namespace Affichage
 
         }
 
+        /// <summary>
+        /// Load the Config File
+        /// </summary>
+        private void LoadConfigFile()
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.Load(Directory.GetCurrentDirectory() + "\\ConfigFile.xml");
+            XmlNode root = doc.DocumentElement.SelectSingleNode("/Affichage");
+
+            XmlNode address = root["address"];
+            SERVER_IP = address["Ip"].InnerText;
+            Int32.TryParse(address["Port"].InnerText, NumberStyles.Any, CultureInfo.InvariantCulture, out PORT_NO);
+
+            Double.TryParse(root["SamplingRate"].InnerText, NumberStyles.Any, CultureInfo.InvariantCulture, out timeInterval);
+
+            XmlNode data = root["Data"];
+            Int32.TryParse(data["Range"].InnerText, NumberStyles.Any, CultureInfo.InvariantCulture, out signalRange);
+            Double.TryParse(data["Min"].InnerText, NumberStyles.Any, CultureInfo.InvariantCulture, out minValue);
+            Double.TryParse(data["Max"].InnerText, NumberStyles.Any, CultureInfo.InvariantCulture, out maxValue);
+
+
+
+        }
+
         private void LoadCsvFile()
         {
             using (StreamReader sr = new StreamReader("E:\\Alec\\Ecole\\GEN1873 Git Folder\\GEN1873\\Fichier csv\\Original Clean.csv"))
@@ -139,32 +150,10 @@ namespace Affichage
 
         }
 
-        public void AddInfoToGraph(double[] data)
-        {
-
-
-            for(int i = 0; i<data.Length-1; i++)
-            {
-                Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    
-                    if (model.ChartDataVoltage[0].Values != null)
-                    {
-                        if (model.ChartDataVoltage[0].Values.Count > 6000)
-                            model.ChartDataVoltage[0].Values.RemoveAt(0);
-
-                        model.ChartDataVoltage[0].Values.Add(new Voltage(time, data[i]));
-                    }
-                    else
-                    {
-                        model.ChartDataVoltage[0].Values = new ChartValues<Voltage> { new Voltage(time, data[i]) };
-                    }
-
-                }), DispatcherPriority.Background);
-                time += 0.250;
-            }
-        }
-
+        /// <summary>
+        /// Fast fourier transform on the data
+        /// </summary>
+        /// <param name="value">200 real number value with the specified interval</param>
         public void FFT(double[] value)
         {
 
@@ -177,22 +166,24 @@ namespace Affichage
 
             }
 
-           // double[] fundamental = MathNet.Numerics.Generate.Sinusoidal(200, 20, 1, 1);
+            // double[] fundamental = MathNet.Numerics.Generate.Sinusoidal(200, 20, 1, 1);
 
+            //Add value to a complex
             System.Numerics.Complex[] tmp = new System.Numerics.Complex[value.Length];
-            double sampleRate = 20;
+            double sampleRate = 1/timeInterval;
             double hzPerSample = sampleRate / value.Length;
             for (int i = 0; i < value.Length; i++)
             {
                 tmp[i] = new System.Numerics.Complex(value[i], 0);
 
             }
+
+            //Process complex with Matlab FFT
             MathNet.Numerics.IntegralTransforms.Fourier.Forward(tmp, MathNet.Numerics.IntegralTransforms.FourierOptions.Matlab);
             double maxValue = 0;
             double freqMaxValue = 0;
             for (int i = 1; i < tmp.Length/2; i++)
             {
-                //Console.WriteLine(Math.Abs(Math.Sqrt(Math.Pow(tmp[i].Real, 2) + Math.Pow(tmp[i].Imaginary, 2))) + "         " + (Math.Pow(tmp[i].Real, 2) + Math.Pow(tmp[i].Imaginary, 2)) + "         " + Math.Sqrt(Math.Pow(tmp[i].Real, 2) + Math.Pow(tmp[i].Imaginary, 2)));
                 double mag = (Math.Abs(Math.Sqrt(Math.Pow(tmp[i].Real, 2) + Math.Pow(tmp[i].Imaginary, 2))));
                 if (mag > maxValue)
                 {
@@ -214,12 +205,17 @@ namespace Affichage
                     }), DispatcherPriority.Normal);
                 }
             }
-            timeBattementCardiaque = timeBattementCardiaque + 10;
+            timeBattementCardiaque = timeBattementCardiaque + Convert.ToInt32(signalRange * timeInterval);
             AddBattementCardiaque(new BattementCardiaque(timeBattementCardiaque, Convert.ToInt32(freqMaxValue * 60)));
 
         }
 
 
+        /// <summary>
+        /// Take a string containing the data and split it with /r /n and add it to voltage graph
+        /// </summary>
+        /// <param name="info">string with the data unprocessed</param>
+        /// <returns></returns>
         public string processData(string info)
         {
             string lastInfo = "";
@@ -233,8 +229,9 @@ namespace Affichage
                     //Il faut un buffer sur les donné lu, parce que les valeur recu sur c# ne sont pas entiere (ex: 1 suivi de 930 au lieu de 1930)
                     //donc il faut eviter que si une de ces valeur se retrouve a la fin du string representant toutes les valeur lu dans l'intervalle
                     //de temps, il ne faut pas que cette valeur coupé en deux soit considérer dans l'affichage
-                    if (value >= 1000 && value <= 10000)
+                    if (value >= minValue && value <= maxValue)
                     {
+                        //Voltage resolution
                         value = value * 3.3 / 4096;
                         
                         Dispatcher.BeginInvoke(new Action(() =>
@@ -242,7 +239,7 @@ namespace Affichage
 
                             if (model.ChartDataVoltage[0].Values != null)
                             {
-                                if (model.ChartDataVoltage[0].Values.Count > 200)
+                                if (model.ChartDataVoltage[0].Values.Count > signalRange)
                                     model.ChartDataVoltage[0].Values.RemoveAt(0);
 
                                 model.ChartDataVoltage[0].Values.Add(new Voltage(time, value));
@@ -256,7 +253,8 @@ namespace Affichage
 
                         }), DispatcherPriority.Normal);
                         voltage.Add(value);
-                        if(voltage.Count >= 200)
+                        //FFT on signalRange value
+                        if(voltage.Count >= signalRange)
                         {
                             double[] array = voltage.ToArray();
                             voltage.Clear();
@@ -264,6 +262,7 @@ namespace Affichage
                             
                         }
                     }
+                    //If it's the last value and it's not valid keep it for the next processing
                     else if(i == data.Length - 1)
                     {
                         lastInfo = data[i];
@@ -275,6 +274,9 @@ namespace Affichage
             return lastInfo;
         }
 
+        /// <summary>
+        /// Listen from incomming data from the Radar
+        /// </summary>
         public void listen()
         {
             TcpClient client = null;
@@ -282,10 +284,8 @@ namespace Affichage
             try
             {
                 List<double> data = new List<double>();
-                int PORT_NO = 8888;
-                string SERVER_IP = "192.168.0.179";
 
-                //---create a TCPClient object at the IP and port no.---
+                //create a TCPClient object at the IP and port no
                 client = new TcpClient(SERVER_IP, PORT_NO);
                 Console.WriteLine("Connection Open");
                 while (appRunning)
@@ -296,12 +296,14 @@ namespace Affichage
                     Byte[] dataReceive = new Byte[4096];
                     string responseData = string.Empty;
                     Int32 bytes;
+                    //Keep receiving and processing data while the radar is running
                     while ((bytes = nwStream.Read(dataReceive, 0, dataReceive.Length)) != 0)
                     {
                         
                         responseData = responseData + Encoding.ASCII.GetString(dataReceive, 0, bytes);
                         //Console.Write(responseData);
                         responseData = processData(responseData);
+                        //Give Time to get a range of data
                         Thread.Sleep(1000);
                     }
                 }
@@ -313,13 +315,15 @@ namespace Affichage
             finally
             {
                 // Stop listening for new clients.
-                client.Close();
+                try
+                {
+                    client.Close();
+                }
+                catch { }
+
             }
 
         }
-
-
-      
 
         private void Window_Closed(object sender, EventArgs e)
         {

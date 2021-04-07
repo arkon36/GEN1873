@@ -5,7 +5,6 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Affichage"
         xmlns:Wpf="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
-        xmlns:oxy="http://oxyplot.org/wpf"
         x:Class="Affichage.MainWindow"
         mc:Ignorable="d"
         Title="Information" Height="306.475" Width="543.58" Closed="Window_Closed">
@@ -55,7 +54,7 @@
                     <Wpf:CartesianChart  Margin="10,8,10,10" Series="{Binding ChartSpectre}" TabIndex="2147483645" Hoverable="False" DataTooltip="{x:Null}" DisableAnimations="True">
                         <Wpf:CartesianChart.AxisY>
                             <Wpf:Axis Title ="Amplitude" Foreground="Black">
-                                
+
                             </Wpf:Axis>
                         </Wpf:CartesianChart.AxisY>
                         <Wpf:CartesianChart.AxisX>
@@ -67,15 +66,6 @@
 
                         </Wpf:CartesianChart.AxisX>
                     </Wpf:CartesianChart>
-                    <!--<oxy:Plot Title="Analyse Spectral">
-                        <oxy:Plot.Series>
-                            <oxy:LineSeries ItemsSource="{Binding spectralAnalysis}"/>
-                        </oxy:Plot.Series>
-                        <oxy:Plot.Axes>
-                            <oxy:LinearAxis Position="Bottom" Title="Fréquence" Minimum="0" Maximum="20" />
-                            <oxy:LinearAxis Position="Left" Title="Amplitude" Minimum="0" Maximum="10" />
-                        </oxy:Plot.Axes>
-                    </oxy:Plot>-->
                 </Grid>
             </TabItem>
         </TabControl>

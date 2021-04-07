@@ -8,6 +8,9 @@ namespace SendInfo
     {
         const int PORT_NO = 5000;
         const string SERVER_IP = "127.0.0.1";
+        /// <summary>
+        /// Program to send info with TCP/IP
+        /// </summary>
         static void Main(string[] args)
         {
             //---data to send to the server---
